@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg: #FBF1E6;
@@ -58,6 +59,8 @@
         .btn-primary:hover { background: #1a1310; }
         .btn-primary:active { transform: scale(0.99); }
         .btn-secondary { background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
+        .btn-accent { background: var(--brand); color: var(--surface); }
+        .btn-accent:hover { background: var(--brand-deep); }
 
         .scale-row { display: flex; justify-content: space-between; align-items: center; gap: 0.4rem; position: relative; padding: 1rem 0; }
         .scale-row::before { content: ''; position: absolute; top: 50%; left: 24px; right: 24px; height: 1px; background: var(--line); z-index: 0; }
@@ -121,20 +124,25 @@
 
             <!-- Result -->
             <section id="scr-result" class="fade-in" style="padding-top: 1rem;">
-                <div class="label-tiny" style="margin-bottom: 0.5rem; text-align: center;">RESULT</div>
-                <h2 style="font-size: 1.6rem; margin-bottom: 1.5rem; text-align: center;">나의 사역 스타일</h2>
-                <div class="result-card">
-                    <div class="result-row">
-                        <div class="result-label">에너지 방향</div>
-                        <p class="result-type"><span id="res-e-type"></span><span class="result-score" id="res-e-score"></span></p>
+                <div id="report-area" style="background: var(--surface); border-radius: 20px; padding: 2rem 1.5rem; border: 1px solid var(--line);">
+                    <div class="label-tiny" style="margin-bottom: 0.5rem; text-align: center;">RESULT</div>
+                    <h2 style="font-size: 1.6rem; margin-bottom: 1.5rem; text-align: center;">나의 사역 스타일</h2>
+                    <div class="result-card" style="margin-bottom: 1rem;">
+                        <div class="result-row">
+                            <div class="result-label">에너지 방향</div>
+                            <p class="result-type"><span id="res-e-type"></span><span class="result-score" id="res-e-score"></span></p>
+                        </div>
+                        <div class="result-row">
+                            <div class="result-label">업무 스타일</div>
+                            <p class="result-type"><span id="res-o-type"></span><span class="result-score" id="res-o-score"></span></p>
+                        </div>
                     </div>
-                    <div class="result-row">
-                        <div class="result-label">업무 스타일</div>
-                        <p class="result-type"><span id="res-o-type"></span><span class="result-score" id="res-o-score"></span></p>
-                    </div>
+                    <p style="font-size: 0.78rem; color: var(--ink-muted); text-align: center; line-height: 1.7; margin: 0;">각 축 7점에서 35점 범위 · 21점이 중립</p>
                 </div>
-                <p style="font-size: 0.78rem; color: var(--ink-muted); text-align: center; line-height: 1.7; margin: 0 0 2rem;">각 축 7점에서 35점 범위 · 21점이 중립</p>
-                <button onclick="resetTest()" class="btn btn-secondary">다시 하기</button>
+                <div style="display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem;">
+                    <button onclick="saveAsImage()" class="btn btn-accent">리포트 이미지로 저장</button>
+                    <button onclick="resetTest()" class="btn btn-secondary">다시 하기</button>
+                </div>
             </section>
         </main>
 
@@ -241,6 +249,19 @@
             s_cur = 0;
             s_ans = new Array(14).fill(0);
             showPage('scr-intro');
+        }
+
+        async function saveAsImage() {
+            const area = document.getElementById('report-area');
+            try { await document.fonts.ready; } catch(e) {}
+            const canvas = await html2canvas(area, { scale: 3, useCORS: true, backgroundColor: '#FFFFFF' });
+            const link = document.createElement('a');
+            const now = new Date();
+            const pad = x => String(x).padStart(2, '0');
+            const ds = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+            link.download = `스타일_진단_${ds}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
         }
 
         function goPrev() {
